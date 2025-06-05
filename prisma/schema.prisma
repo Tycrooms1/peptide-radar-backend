@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id                String   @id @default(cuid())
+  shopifyCustomerId String   @unique
+  shopDomain        String
+  email             String?
+  phone             String?
+  firstName         String?
+  lastName          String?
+  plan              String   @default("free")
+  stripeCustomerId  String?  @unique
+  
+  emailNotifications Boolean @default(true)
+  smsNotifications   Boolean @default(true)
+  quietHoursStart    String  @default("22:00")
+  quietHoursEnd      String  @default("07:00")
+  timezone          String  @default("UTC")
+  
+  peptides          Peptide[]
+  dosageLogs        DosageLog[]
+  weightLogs        WeightLog[]
+  scheduledDoses    ScheduledDose[]
+  calculations      Calculation[]
+  subscriptions     Subscription[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("customers")
+}
+
+model Peptide {
+  id           String   @id @default(cuid())
+  customerId   String
+  name         String
+  strength     Float
+  unit         String
+  waterVolume  Float
+  dateAdded    DateTime @default(now())
+  
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@map("peptides")
+}
+
+model DosageLog {
+  id         String   @id @default(cuid())
+  customerId String
+  peptide    String
+  amount     Float
+  unit       String
+  date       DateTime
+  notes      String?
+  source     String   @default("manual")
+  
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@map("dosage_logs")
+}
+
+model WeightLog {
+  id         String   @id @default(cuid())
+  customerId String
+  weight     Float
+  unit       String
+  date       DateTime
+  notes      String?
+  
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@map("weight_logs")
+}
+
+model ScheduledDose {
+  id                String    @id @default(cuid())
+  customerId        String
+  peptide           String
+  amount            Float
+  unit              String
+  dateTime          DateTime
+  reminderTiming    Int       @default(15)
+  frequency         String    @default("once")
+  endDate           DateTime?
+  emailNotification Boolean   @default(true)
+  textNotification  Boolean   @default(true)
+  status            String    @default("scheduled")
+  reminderSent      Boolean   @default(false)
+  takenAt           DateTime?
+  
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@map("scheduled_doses")
+}
+
+model Calculation {
+  id              String   @id @default(cuid())
+  customerId      String
+  intendedDose    Float
+  doseUnit        String
+  peptideStrength Float
+  strengthUnit    String
+  bacWater        Float
+  syringeType     Float
+  result          String
+  date            DateTime @default(now())
+  
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@map("calculations")
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  customerId           String
+  stripeSubscriptionId String    @unique
+  status               String
+  plan                 String    @default("premium")
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean   @default(false)
+  
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("subscriptions")
+}
