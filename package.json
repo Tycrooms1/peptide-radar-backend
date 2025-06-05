@@ -1,0 +1,31 @@
+{
+  "name": "peptide-radar-backend",
+  "version": "1.0.0",
+  "description": "Backend API server for Peptide Radar with Mailchimp integration",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "build": "prisma generate && prisma db push"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.7.0",
+    "twilio": "^4.19.0",
+    "nodemailer": "^6.9.1",
+    "node-cron": "^3.0.2",
+    "@prisma/client": "^5.7.0",
+    "stripe": "^14.9.0",
+    "@mailchimp/mailchimp_marketing": "^3.0.80",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
